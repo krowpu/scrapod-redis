@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'scrapod/redis/process'
 require 'scrapod/redis/session'
 require 'scrapod/redis/version'
 
