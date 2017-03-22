@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'scrapod/redis/session'
 require 'scrapod/redis/version'
 
 module Scrapod

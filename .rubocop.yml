@@ -7,9 +7,6 @@ Metrics/LineLength:
 Style/AccessModifierIndentation:
   EnforcedStyle: outdent
 
-Style/ClassVars:
-  Enabled: false
-
 Style/Documentation:
   Enabled: false
 
