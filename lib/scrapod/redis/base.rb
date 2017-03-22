@@ -43,6 +43,8 @@ module Scrapod
       private_class_method :define_belongs_to_id_getter
       private_class_method :define_belongs_to_id_setter
 
+      private_class_method :define_belongs_to_getter
+
       def self.belongs_to(name, class_name)
         raise TypeError, "Expected name to be a #{Symbol}"              unless name.is_a? Symbol
         raise ArgumentError, "Invalid association name #{name.inspect}" unless name =~ NAME_RE
@@ -59,13 +61,7 @@ module Scrapod
         define_belongs_to_id_getter name
         define_belongs_to_id_setter name
 
-        define_method name do
-          result = instance_variable_get :"@#{name}"
-          break result if result
-          id = instance_variable_get :"@#{name}_id"
-          break if id.nil?
-          instance_variable_set :"@#{name}", constantize.().find(::Redis.new, id)
-        end
+        define_belongs_to_getter name, constantize
 
         define_method :"#{name}=" do |record|
           if record.nil?
@@ -103,6 +99,16 @@ module Scrapod
           instance_variable_set :"@#{name}", nil
 
           result
+        end
+      end
+
+      def self.define_belongs_to_getter(name, constantize)
+        define_method name do
+          result = instance_variable_get :"@#{name}"
+          break result if result
+          id = instance_variable_get :"@#{name}_id"
+          break if id.nil?
+          instance_variable_set :"@#{name}", constantize.().find(::Redis.new, id)
         end
       end
 
