@@ -47,7 +47,11 @@ module Scrapod
         raise TypeError, "Expected class name to be a #{String}"        unless class_name.is_a? String
         raise ArgumentError, "Invalid class name #{class_name.inspect}" unless class_name =~ CLASS_NAME_RE
 
-        constantize = self.constantize class_name
+        constantize = lambda do
+          class_name.split('::').inject Object do |namespace, item_name|
+            namespace.const_get item_name
+          end
+        end
 
         attr_reader :"#{name}_id"
 
@@ -89,14 +93,6 @@ module Scrapod
           send :"#{name}_id=", record.id
 
           send name
-        end
-      end
-
-      def self.constantize(class_name)
-        lambda do
-          class_name.split('::').inject Object do |namespace, item_name|
-            namespace.const_get item_name
-          end
         end
       end
 
