@@ -7,6 +7,8 @@ module Scrapod
     class Session < Base
       self.model_name = 'session'
 
+      belongs_to :process, 'Scrapod::Redis::Process'
+
       attr_reader :started_at
 
       def initialize(*)
@@ -21,6 +23,7 @@ module Scrapod
 
       def as_json
         {
+          'process_id' => process_id,
           'started_at' => started_at&.to_i,
         }
       end
