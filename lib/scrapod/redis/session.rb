@@ -9,12 +9,8 @@ module Scrapod
 
       attr_reader :active, :started_at
 
-      def initialize(options = {})
-        options.each do |k, v|
-          send :"#{k}=", v
-        end
-
-        id
+      def initialize(*)
+        super
 
         @active     ||= false
         @started_at ||= nil

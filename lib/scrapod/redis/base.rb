@@ -21,6 +21,14 @@ module Scrapod
         @model_name = value.dup.freeze
       end
 
+      def initialize(options = {})
+        options.each do |k, v|
+          send :"#{k}=", v
+        end
+
+        id
+      end
+
       def id
         @id ||= SecureRandom.uuid.freeze
       end
