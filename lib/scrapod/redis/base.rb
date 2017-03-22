@@ -29,6 +29,12 @@ module Scrapod
         new options.merge! id: id
       end
 
+      def self.all(conn)
+        conn.smembers("#{model_name}:all").map do |id|
+          find conn, id
+        end
+      end
+
       def initialize(options = {})
         options.each do |k, v|
           send :"#{k}=", v
@@ -38,7 +44,10 @@ module Scrapod
       end
 
       def save(conn)
-        conn.set "#{self.class.model_name}:id:#{id}", as_json.to_json
+        conn.multi do
+          conn.set "#{self.class.model_name}:id:#{id}", as_json.to_json
+          conn.sadd "#{self.class.model_name}:all", id
+        end
       end
 
       def id
