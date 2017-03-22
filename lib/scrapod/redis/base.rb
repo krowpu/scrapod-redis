@@ -50,6 +50,13 @@ module Scrapod
         end
       end
 
+      def destroy(conn)
+        conn.multi do
+          conn.del "#{self.class.model_name}:id:#{id}"
+          conn.srem "#{self.class.model_name}:all", id
+        end
+      end
+
       def id
         @id ||= SecureRandom.uuid.freeze
       end
