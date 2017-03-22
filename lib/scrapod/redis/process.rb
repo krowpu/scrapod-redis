@@ -4,7 +4,7 @@ require 'scrapod/redis/base'
 
 module Scrapod
   module Redis
-    class Process
+    class Process < Base
       self.model_name = 'process'
 
       attr_reader :started_at
