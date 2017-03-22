@@ -44,6 +44,7 @@ module Scrapod
       private_class_method :define_belongs_to_id_setter
 
       private_class_method :define_belongs_to_getter
+      private_class_method :define_belongs_to_setter
 
       def self.belongs_to(name, class_name)
         raise TypeError, "Expected name to be a #{Symbol}"              unless name.is_a? Symbol
@@ -62,22 +63,7 @@ module Scrapod
         define_belongs_to_id_setter name
 
         define_belongs_to_getter name, constantize
-
-        define_method :"#{name}=" do |record|
-          if record.nil?
-            instance_variable_set :"@#{name}_id", nil
-            instance_variable_set :"@#{name}",    nil
-            break
-          end
-
-          klass = constantize.()
-
-          raise TypeError, "Expected record to be a #{klass}" unless record.is_a? klass
-
-          send :"#{name}_id=", record.id
-
-          send name
-        end
+        define_belongs_to_setter name, constantize
       end
 
       def self.define_belongs_to_id_getter(name)
@@ -109,6 +95,24 @@ module Scrapod
           id = instance_variable_get :"@#{name}_id"
           break if id.nil?
           instance_variable_set :"@#{name}", constantize.().find(::Redis.new, id)
+        end
+      end
+
+      def self.define_belongs_to_setter(name, constantize)
+        define_method :"#{name}=" do |record|
+          if record.nil?
+            instance_variable_set :"@#{name}_id", nil
+            instance_variable_set :"@#{name}",    nil
+            break
+          end
+
+          klass = constantize.()
+
+          raise TypeError, "Expected record to be a #{klass}" unless record.is_a? klass
+
+          send :"#{name}_id=", record.id
+
+          send name
         end
       end
 
