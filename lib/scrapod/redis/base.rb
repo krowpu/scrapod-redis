@@ -3,11 +3,14 @@
 require 'json'
 require 'securerandom'
 
+require 'scrapod/redis/belongs_to'
+
 module Scrapod
   module Redis
     class Base
+      extend BelongsTo
+
       NAME_RE = /\A[a-z][a-z0-9]*(_[a-z][a-z0-9]*)*\z/
-      CLASS_NAME_RE = /\A[A-Z][a-zA-Z0-9]*(::[A-Z][a-zA-Z0-9]*)*\z/
 
       def self.model_name
         raise "#{self}.model_name has not been set" if @model_name.nil?
@@ -37,82 +40,6 @@ module Scrapod
       def self.all(conn)
         conn.smembers("#{model_name}:all").map do |id|
           find conn, id
-        end
-      end
-
-      private_class_method :define_belongs_to_id_getter
-      private_class_method :define_belongs_to_id_setter
-
-      private_class_method :define_belongs_to_getter
-      private_class_method :define_belongs_to_setter
-
-      def self.belongs_to(name, class_name)
-        raise TypeError, "Expected name to be a #{Symbol}"              unless name.is_a? Symbol
-        raise ArgumentError, "Invalid association name #{name.inspect}" unless name =~ NAME_RE
-
-        raise TypeError, "Expected class name to be a #{String}"        unless class_name.is_a? String
-        raise ArgumentError, "Invalid class name #{class_name.inspect}" unless class_name =~ CLASS_NAME_RE
-
-        constantize = lambda do
-          class_name.split('::').inject Object do |namespace, item_name|
-            namespace.const_get item_name
-          end
-        end
-
-        define_belongs_to_id_getter name
-        define_belongs_to_id_setter name
-
-        define_belongs_to_getter name, constantize
-        define_belongs_to_setter name, constantize
-      end
-
-      def self.define_belongs_to_id_getter(name)
-        attr_reader :"#{name}_id"
-      end
-
-      def self.define_belongs_to_id_setter(name)
-        define_method :"#{name}_id=" do |id|
-          if id.nil?
-            instance_variable_set :"@#{name}_id", nil
-            instance_variable_set :"@#{name}",    nil
-            break
-          end
-
-          raise TypeError, "Expected ID to be a #{String}" unless id.is_a? String
-          raise ArgumentError, %(Can not set #{self.class}##{name}id to #{id.inspect} because it contains ":") if id =~ /:/
-
-          result = instance_variable_set :"@#{name}_id", id.dup.freeze
-          instance_variable_set :"@#{name}", nil
-
-          result
-        end
-      end
-
-      def self.define_belongs_to_getter(name, constantize)
-        define_method name do
-          result = instance_variable_get :"@#{name}"
-          break result if result
-          id = instance_variable_get :"@#{name}_id"
-          break if id.nil?
-          instance_variable_set :"@#{name}", constantize.().find(::Redis.new, id)
-        end
-      end
-
-      def self.define_belongs_to_setter(name, constantize)
-        define_method :"#{name}=" do |record|
-          if record.nil?
-            instance_variable_set :"@#{name}_id", nil
-            instance_variable_set :"@#{name}",    nil
-            break
-          end
-
-          klass = constantize.()
-
-          raise TypeError, "Expected record to be a #{klass}" unless record.is_a? klass
-
-          send :"#{name}_id=", record.id
-
-          send name
         end
       end
 
