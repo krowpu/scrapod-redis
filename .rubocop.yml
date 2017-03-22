@@ -13,6 +13,9 @@ Style/Documentation:
 Style/DoubleNegation:
   Enabled: false
 
+Style/LambdaCall:
+  Enabled: false
+
 Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: comma
 
