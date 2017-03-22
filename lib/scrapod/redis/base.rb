@@ -22,6 +22,10 @@ module Scrapod
         @model_name = value.dup.freeze
       end
 
+      def self.create(conn, options = {})
+        new(options).save conn
+      end
+
       def self.find(conn, id)
         json = conn.get "#{model_name}:id:#{id}"
         raise RecordNotFoundError.new(model_name, id) if json.nil?
@@ -48,6 +52,7 @@ module Scrapod
           conn.set "#{self.class.model_name}:id:#{id}", as_json.to_json
           conn.sadd "#{self.class.model_name}:all", id
         end
+        self
       end
 
       def destroy(conn)
