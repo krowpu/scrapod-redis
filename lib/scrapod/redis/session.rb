@@ -14,6 +14,8 @@ module Scrapod
           send :"#{k}=", v
         end
 
+        id
+
         @active     ||= false
         @started_at ||= nil
       end

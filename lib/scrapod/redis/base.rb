@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'securerandom'
+
 module Scrapod
   module Redis
     class Base
@@ -17,6 +19,18 @@ module Scrapod
         raise ArgumentError, "Model name #{value.inspect} is invalid" unless value =~ NAME_RE
 
         @model_name = value.dup.freeze
+      end
+
+      def id
+        @id ||= SecureRandom.uuid.freeze
+      end
+
+      def id=(value)
+        raise "#{self.class}#id has been already set to #{@id.inspect}" unless @id.nil?
+
+        raise %(Can not set #{self.class}#id to #{value.inspect} because if contains ":") if value =~ /:/
+
+        @id = value.dup.freeze
       end
     end
   end
