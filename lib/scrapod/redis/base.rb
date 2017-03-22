@@ -40,6 +40,7 @@ module Scrapod
         end
       end
 
+      private_class_method :define_belongs_to_id_getter
       private_class_method :define_belongs_to_id_setter
 
       def self.belongs_to(name, class_name)
@@ -55,8 +56,7 @@ module Scrapod
           end
         end
 
-        attr_reader :"#{name}_id"
-
+        define_belongs_to_id_getter name
         define_belongs_to_id_setter name
 
         define_method name do
@@ -82,6 +82,10 @@ module Scrapod
 
           send name
         end
+      end
+
+      def self.define_belongs_to_id_getter(name)
+        attr_reader :"#{name}_id"
       end
 
       def self.define_belongs_to_id_setter(name)
