@@ -40,6 +40,8 @@ module Scrapod
         end
       end
 
+      private_class_method :define_belongs_to_id_setter
+
       def self.belongs_to(name, class_name)
         raise TypeError, "Expected name to be a #{Symbol}"              unless name.is_a? Symbol
         raise ArgumentError, "Invalid association name #{name.inspect}" unless name =~ NAME_RE
@@ -55,21 +57,7 @@ module Scrapod
 
         attr_reader :"#{name}_id"
 
-        define_method :"#{name}_id=" do |id|
-          if id.nil?
-            instance_variable_set :"@#{name}_id", nil
-            instance_variable_set :"@#{name}",    nil
-            break
-          end
-
-          raise TypeError, "Expected ID to be a #{String}" unless id.is_a? String
-          raise ArgumentError, %(Can not set #{self.class}##{name}id to #{id.inspect} because it contains ":") if id =~ /:/
-
-          result = instance_variable_set :"@#{name}_id", id.dup.freeze
-          instance_variable_set :"@#{name}", nil
-
-          result
-        end
+        define_belongs_to_id_setter name
 
         define_method name do
           result = instance_variable_get :"@#{name}"
@@ -93,6 +81,24 @@ module Scrapod
           send :"#{name}_id=", record.id
 
           send name
+        end
+      end
+
+      def self.define_belongs_to_id_setter(name)
+        define_method :"#{name}_id=" do |id|
+          if id.nil?
+            instance_variable_set :"@#{name}_id", nil
+            instance_variable_set :"@#{name}",    nil
+            break
+          end
+
+          raise TypeError, "Expected ID to be a #{String}" unless id.is_a? String
+          raise ArgumentError, %(Can not set #{self.class}##{name}id to #{id.inspect} because it contains ":") if id =~ /:/
+
+          result = instance_variable_set :"@#{name}_id", id.dup.freeze
+          instance_variable_set :"@#{name}", nil
+
+          result
         end
       end
 
