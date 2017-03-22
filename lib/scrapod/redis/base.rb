@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'json'
 require 'securerandom'
 
 module Scrapod
@@ -21,6 +22,13 @@ module Scrapod
         @model_name = value.dup.freeze
       end
 
+      def self.find(conn, id)
+        json = conn.get "#{model_name}:id:#{id}"
+        raise RecordNotFoundError.new(model_name, id) if json.nil?
+        options = JSON.parse json
+        new options.merge! id: id
+      end
+
       def initialize(options = {})
         options.each do |k, v|
           send :"#{k}=", v
@@ -39,6 +47,20 @@ module Scrapod
         raise %(Can not set #{self.class}#id to #{value.inspect} because if contains ":") if value =~ /:/
 
         @id = value.dup.freeze
+      end
+
+      class Error < RuntimeError
+      end
+
+      class RecordNotFoundError < Error
+        attr_reader :model_name, :id
+
+        def initialize(model_name, id)
+          @model_name = model_name
+          @id = id
+
+          super "Can not find #{model_name} with ID #{id}"
+        end
       end
     end
   end
