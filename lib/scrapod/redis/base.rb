@@ -37,6 +37,10 @@ module Scrapod
         id
       end
 
+      def save(conn)
+        conn.set "#{self.class.model_name}:id:#{id}", as_json.to_json
+      end
+
       def id
         @id ||= SecureRandom.uuid.freeze
       end
