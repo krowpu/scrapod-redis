@@ -105,13 +105,16 @@ module Scrapod
       end
 
       def initialize(options = {})
-        options.each do |k, v|
-          send :"#{k}=", v
-        end
+        self.id   = options.delete :id   if options.key? :id
+        self.conn = options.delete :conn if options.key? :conn
+
+        id
 
         raise "#{self.class}#conn has not been set" if conn.nil?
 
-        id
+        options.each do |k, v|
+          send :"#{k}=", v
+        end
       end
 
       def save
