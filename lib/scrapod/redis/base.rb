@@ -82,6 +82,11 @@ module Scrapod
         define_belongs_to_nullifier name
       end
 
+      def self.has_many(name, _class_name, inverse_of:) # rubocop:disable Style/PredicateName
+        validate_attribute_name name
+        validate_attribute_name inverse_of
+      end
+
       def self.define_belongs_to_id_getter(name)
         attr_reader :"#{name}_id"
       end
