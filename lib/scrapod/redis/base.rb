@@ -11,6 +11,8 @@ require 'scrapod/redis/utils'
 module Scrapod
   module Redis
     class Base
+      extend Utils
+
       include Id
       include Conn
       include BelongsTo
@@ -22,10 +24,7 @@ module Scrapod
 
       def self.model_name=(value)
         raise "#{self}.model_name has already been set" unless @model_name.nil?
-
-        raise TypeError, "Expected model name to be a #{String}" unless value.is_a? String
-        raise ArgumentError, "Model name #{value.inspect} is invalid" unless value =~ Utils::NAME_RE
-
+        validate_model_name value
         @model_name = value.dup.freeze
       end
 

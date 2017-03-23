@@ -21,6 +21,11 @@ module Scrapod
         end
       end
 
+      def validate_model_name(name)
+        raise TypeError, "Expected model name to be a #{String}"     unless name.is_a? String
+        raise ArgumentError, "Model name #{name.inspect} is invalid" unless name =~ Utils::NAME_RE
+      end
+
       def validate_attribute_name(name)
         raise TypeError, "Expected name to be a #{Symbol}"              unless name.is_a? Symbol
         raise ArgumentError, "Invalid association name #{name.inspect}" unless name =~ NAME_RE
@@ -28,6 +33,7 @@ module Scrapod
 
       module_function :constantize
       module_function :new_constantizer
+      module_function :validate_model_name
       module_function :validate_attribute_name
     end
   end
