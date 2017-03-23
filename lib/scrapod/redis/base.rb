@@ -115,7 +115,7 @@ module Scrapod
 
           klass = constantizer.()
 
-          raise TypeError, "Expected record to be a #{klass}"            unless record.is_a? klass
+          raise TypeError, "Expected record to be a #{klass}" unless record.is_a? klass
 
           send :"#{name}_id=", record.require_id
 
