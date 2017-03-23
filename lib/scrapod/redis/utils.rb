@@ -13,8 +13,7 @@ module Scrapod
       end
 
       def new_constantizer(class_name)
-        raise TypeError, "Expected class name to be a #{String}"        unless class_name.is_a? String
-        raise ArgumentError, "Invalid class name #{class_name.inspect}" unless class_name =~ CLASS_NAME_RE
+        validate_class_name class_name
 
         lambda do
           constantize class_name
@@ -35,6 +34,11 @@ module Scrapod
       def validate_attribute_name(name)
         raise TypeError, "Expected name to be a #{Symbol}"              unless name.is_a? Symbol
         raise ArgumentError, "Invalid association name #{name.inspect}" unless name =~ NAME_RE
+      end
+
+      def validate_class_name(name)
+        raise TypeError, "Expected class name to be a #{String}"  unless name.is_a? String
+        raise ArgumentError, "Invalid class name #{name.inspect}" unless name =~ CLASS_NAME_RE
       end
     end
   end

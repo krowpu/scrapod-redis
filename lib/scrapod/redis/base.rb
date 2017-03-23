@@ -4,6 +4,7 @@ require 'json'
 require 'securerandom'
 
 require 'scrapod/redis/attributes'
+require 'scrapod/redis/belongs_to'
 require 'scrapod/redis/utils'
 
 module Scrapod
@@ -65,19 +66,22 @@ module Scrapod
         end
       end
 
+      def self.belongs_to_associations
+        @belongs_to_associations ||= {}
+      end
+
       def self.belongs_to(name, class_name, null: true, inverse_of: nil)
         validate_attribute_name name
-        validate_attribute_name inverse_of if inverse_of
 
-        constantizer = new_constantizer class_name
+        association = belongs_to_associations[name] = BelongsTo.new class_name, inverse_of: inverse_of, null: null
 
-        attributes[:"#{name}_id"] = Attributes::ForeignKey.new null ? nil : constantizer
+        attributes[:"#{name}_id"] = association.attribute
 
         define_belongs_to_id_getter name
         define_belongs_to_id_setter name
 
-        define_belongs_to_getter name, constantizer
-        define_belongs_to_setter name, constantizer
+        define_belongs_to_getter name, association.constantizer
+        define_belongs_to_setter name, association.constantizer
 
         define_belongs_to_nullifier name
       end
