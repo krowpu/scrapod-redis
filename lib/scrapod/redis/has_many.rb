@@ -28,6 +28,14 @@ module Scrapod
         @inverse ||= klass.belongs_to_associations[inverse_of]
       end
 
+      def query(conn, my_id)
+        validate_id my_id
+
+        conn.smembers("#{me.model_name}:id:#{my_id}:#{name}").map do |id|
+          association.klass.find conn, id
+        end
+      end
+
     private
 
       def me=(value)

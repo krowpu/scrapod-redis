@@ -34,6 +34,10 @@ module Scrapod
         @inverse ||= klass.has_many_associations[inverse_of]
       end
 
+      def query(conn, id)
+        klass.find conn, id
+      end
+
     private
 
       def me=(value)

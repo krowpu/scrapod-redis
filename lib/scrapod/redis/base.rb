@@ -47,7 +47,7 @@ module Scrapod
       end
 
       def self.belongs_to(name, class_name, inverse_of, null: true)
-        association = belongs_to_associations[name] = BelongsTo.new self.class, name, class_name, inverse_of, null: null
+        association = belongs_to_associations[name] = BelongsTo.new self, name, class_name, inverse_of, null: null
 
         attributes[:"#{name}_id"] = association.attribute
 
@@ -61,7 +61,7 @@ module Scrapod
       end
 
       def self.has_many(name, class_name, inverse_of) # rubocop:disable Style/PredicateName
-        association = has_many_associations[name] = HasMany.new self.class, name, class_name, inverse_of
+        association = has_many_associations[name] = HasMany.new self, name, class_name, inverse_of
 
         define_has_many_getter association
       end
@@ -99,7 +99,7 @@ module Scrapod
           break result if result
           id = instance_variable_get :"@#{association.name}_id"
           break if id.nil?
-          instance_variable_set :"@#{association.name}", association.klass.find(conn, id)
+          instance_variable_set :"@#{association.name}", association.query(conn, id)
         end
       end
 
@@ -124,8 +124,7 @@ module Scrapod
         define_method association.name do
           result = instance_variable_get :"@#{association.name}"
           break result if result
-          ids = conn.smembers "#{self.class.model_name}:id:#{require_id}:#{association.name}"
-          result = ids.map { |id| association.klass.find conn, id }
+          result = association.query conn, require_id
           instance_variable_set :"@#{association.name}", result
         end
       end
