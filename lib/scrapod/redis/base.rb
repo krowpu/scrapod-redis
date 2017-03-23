@@ -10,9 +10,8 @@ require 'scrapod/redis/utils'
 module Scrapod
   module Redis
     class Base
-      extend BelongsTo
-
       include Id
+      include BelongsTo
 
       def self.model_name
         raise "#{self}.model_name has not been set" if @model_name.nil?
