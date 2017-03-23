@@ -5,6 +5,7 @@ require 'securerandom'
 
 require 'scrapod/redis/attributes'
 require 'scrapod/redis/belongs_to'
+require 'scrapod/redis/has_many'
 require 'scrapod/redis/utils'
 
 module Scrapod
@@ -86,9 +87,14 @@ module Scrapod
         define_belongs_to_nullifier name
       end
 
-      def self.has_many(name, _class_name, inverse_of:) # rubocop:disable Style/PredicateName
+      def self.has_many_associations # rubocop:disable Style/PredicateName
+        @has_many_associations ||= {}
+      end
+
+      def self.has_many(name, class_name, inverse_of:) # rubocop:disable Style/PredicateName
         validate_attribute_name name
-        validate_attribute_name inverse_of
+
+        has_many_associations[name] = HasMany.new class_name, inverse_of: inverse_of
       end
 
       def self.define_belongs_to_id_getter(name)
