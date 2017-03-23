@@ -144,6 +144,8 @@ module Scrapod
         @id = value.dup.freeze
       end
 
+    private
+
       attr_reader :conn
 
       def conn=(value)
