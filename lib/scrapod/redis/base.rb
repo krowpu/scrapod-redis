@@ -81,8 +81,8 @@ module Scrapod
         define_belongs_to_id_getter name
         define_belongs_to_id_setter name
 
-        define_belongs_to_getter name, association.constantizer
-        define_belongs_to_setter name, association.constantizer
+        define_belongs_to_getter name, association
+        define_belongs_to_setter name, association
 
         define_belongs_to_nullifier name
       end
@@ -114,21 +114,21 @@ module Scrapod
         end
       end
 
-      def self.define_belongs_to_getter(name, constantizer)
+      def self.define_belongs_to_getter(name, association)
         define_method name do
           result = instance_variable_get :"@#{name}"
           break result if result
           id = instance_variable_get :"@#{name}_id"
           break if id.nil?
-          instance_variable_set :"@#{name}", constantizer.().find(conn, id)
+          instance_variable_set :"@#{name}", association.constantizer.().find(conn, id)
         end
       end
 
-      def self.define_belongs_to_setter(name, constantizer)
+      def self.define_belongs_to_setter(name, association)
         define_method :"#{name}=" do |record|
           break send :"nullify_#{name}" if record.nil?
 
-          klass = constantizer.()
+          klass = association.constantizer.()
 
           raise TypeError, "Expected record to be a #{klass}" unless record.is_a? klass
 
