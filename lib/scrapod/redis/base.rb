@@ -25,25 +25,6 @@ module Scrapod
         @model_name = value.dup.freeze
       end
 
-      def self.create(conn, options = {})
-        new(options.merge(conn: conn)).save
-      end
-
-      def self.find(conn, id)
-        validate_id id
-
-        json = conn.get "#{model_name}:id:#{id}"
-        raise RecordNotFoundError.new(model_name, id) if json.nil?
-        options = JSON.parse json
-        new options.merge! id: id, conn: conn
-      end
-
-      def self.all(conn)
-        conn.smembers("#{model_name}:all").map do |id|
-          find conn, id
-        end
-      end
-
       def self.attributes
         @attributes ||= {}
       end
@@ -142,6 +123,25 @@ module Scrapod
         define_method :"nullify_#{name}" do
           instance_variable_set :"@#{name}_id", nil
           instance_variable_set :"@#{name}",    nil
+        end
+      end
+
+      def self.create(conn, options = {})
+        new(options.merge(conn: conn)).save
+      end
+
+      def self.find(conn, id)
+        validate_id id
+
+        json = conn.get "#{model_name}:id:#{id}"
+        raise RecordNotFoundError.new(model_name, id) if json.nil?
+        options = JSON.parse json
+        new options.merge! id: id, conn: conn
+      end
+
+      def self.all(conn)
+        conn.smembers("#{model_name}:all").map do |id|
+          find conn, id
         end
       end
 
