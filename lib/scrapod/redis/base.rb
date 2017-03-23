@@ -62,8 +62,9 @@ module Scrapod
         end
       end
 
-      def self.belongs_to(name, class_name, null: true)
+      def self.belongs_to(name, class_name, null: true, inverse_of: nil)
         validate_attribute_name name
+        validate_attribute_name inverse_of if inverse_of
 
         attributes[:"#{name}_id"] = Attributes::Integer.new null: null
 
