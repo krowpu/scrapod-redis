@@ -2,29 +2,27 @@
 
 require 'redis'
 
+require 'scrapod/redis/utils'
+
 module Scrapod
   module Redis
     module BelongsTo
-      CLASS_NAME_RE = /\A[A-Z][a-zA-Z0-9]*(::[A-Z][a-zA-Z0-9]*)*\z/
+      include Utils
 
       def belongs_to(name, class_name)
         raise TypeError, "Expected name to be a #{Symbol}"              unless name.is_a? Symbol
-        raise ArgumentError, "Invalid association name #{name.inspect}" unless name =~ NAME_RE
+        raise ArgumentError, "Invalid association name #{name.inspect}" unless name =~ Utils::NAME_RE
 
         raise TypeError, "Expected class name to be a #{String}"        unless class_name.is_a? String
-        raise ArgumentError, "Invalid class name #{class_name.inspect}" unless class_name =~ CLASS_NAME_RE
+        raise ArgumentError, "Invalid class name #{class_name.inspect}" unless class_name =~ Utils::CLASS_NAME_RE
 
-        constantize = lambda do
-          class_name.split('::').inject Object do |namespace, item_name|
-            namespace.const_get item_name
-          end
-        end
+        constantizer = self.constantizer class_name
 
         define_belongs_to_id_getter name
         define_belongs_to_id_setter name
 
-        define_belongs_to_getter name, constantize
-        define_belongs_to_setter name, constantize
+        define_belongs_to_getter name, constantizer
+        define_belongs_to_setter name, constantizer
       end
 
     private
