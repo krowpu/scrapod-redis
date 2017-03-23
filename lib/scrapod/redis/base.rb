@@ -65,7 +65,9 @@ module Scrapod
       def self.has_many(name, class_name, inverse_of) # rubocop:disable Style/PredicateName
         validate_attribute_name name
 
-        has_many_associations[name] = HasMany.new class_name, inverse_of
+        association = has_many_associations[name] = HasMany.new class_name, inverse_of
+
+        define_has_many_getter name, association
       end
 
       def self.define_attribute_getter(name)
@@ -123,6 +125,16 @@ module Scrapod
         define_method :"nullify_#{name}" do
           instance_variable_set :"@#{name}_id", nil
           instance_variable_set :"@#{name}",    nil
+        end
+      end
+
+      def self.define_has_many_getter(name, association)
+        define_method name do
+          result = instance_variable_get :"@#{name}"
+          break result if result
+          ids = conn.smembers "#{self.class.model_name}:id:#{require_id}:#{name}"
+          result = ids.map { |id| association.klass.find conn, id }
+          instance_variable_set :"@#{name}", result
         end
       end
 
