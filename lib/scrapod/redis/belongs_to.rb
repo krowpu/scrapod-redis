@@ -52,21 +52,21 @@ module Scrapod
           end
         end
 
-        def define_belongs_to_getter(name, constantize)
+        def define_belongs_to_getter(name, constantizer)
           define_method name do
             result = instance_variable_get :"@#{name}"
             break result if result
             id = instance_variable_get :"@#{name}_id"
             break if id.nil?
-            instance_variable_set :"@#{name}", constantize.().find(conn, id)
+            instance_variable_set :"@#{name}", constantizer.().find(conn, id)
           end
         end
 
-        def define_belongs_to_setter(name, constantize)
+        def define_belongs_to_setter(name, constantizer)
           define_method :"#{name}=" do |record|
             break send :"nullify_#{name}" if record.nil?
 
-            klass = constantize.()
+            klass = constantizer.()
 
             raise TypeError, "Expected record to be a #{klass}" unless record.is_a? klass
 
