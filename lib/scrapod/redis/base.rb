@@ -38,6 +38,23 @@ module Scrapod
         end
       end
 
+      def self.datetime(name)
+        validate_attribute_name name
+
+        define_attribute_getter name
+        define_datetime_setter name
+      end
+
+      def self.define_attribute_getter(name)
+        attr_reader name
+      end
+
+      def self.define_datetime_setter(name)
+        define_method :"#{name}=" do |value|
+          instance_variable_set :"@#{name}", value.nil? ? nil : Time.at(value)
+        end
+      end
+
       def self.belongs_to(name, class_name)
         validate_attribute_name name
 
