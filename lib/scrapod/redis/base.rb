@@ -171,6 +171,7 @@ module Scrapod
         end
 
         @persisted = false
+        @id = nil
       end
 
       def persisted?
