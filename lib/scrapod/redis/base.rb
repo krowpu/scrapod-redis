@@ -4,6 +4,7 @@ require 'json'
 require 'securerandom'
 
 require 'scrapod/redis/belongs_to'
+require 'scrapod/redis/conn'
 require 'scrapod/redis/id'
 require 'scrapod/redis/utils'
 
@@ -11,6 +12,7 @@ module Scrapod
   module Redis
     class Base
       include Id
+      include Conn
       include BelongsTo
 
       def self.model_name
@@ -28,14 +30,14 @@ module Scrapod
       end
 
       def self.create(conn, options = {})
-        new(options).save conn
+        new(options.merge(conn: conn)).save
       end
 
       def self.find(conn, id)
         json = conn.get "#{model_name}:id:#{id}"
         raise RecordNotFoundError.new(model_name, id) if json.nil?
         options = JSON.parse json
-        new options.merge! id: id
+        new options.merge! id: id, conn: conn
       end
 
       def self.all(conn)
@@ -49,10 +51,12 @@ module Scrapod
           send :"#{k}=", v
         end
 
+        raise "#{self.class}#conn has not been set" if conn.nil?
+
         id
       end
 
-      def save(conn)
+      def save
         conn.multi do
           conn.set "#{self.class.model_name}:id:#{id}", as_json.to_json
           conn.sadd "#{self.class.model_name}:all", id
@@ -60,7 +64,7 @@ module Scrapod
         self
       end
 
-      def destroy(conn)
+      def destroy
         conn.multi do
           conn.del "#{self.class.model_name}:id:#{id}"
           conn.srem "#{self.class.model_name}:all", id

@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
-require 'redis'
-
+require 'scrapod/redis/conn'
 require 'scrapod/redis/utils'
 
 module Scrapod
   module Redis
     module BelongsTo
+      include Conn
+
       def self.included(base)
         base.extend ClassMethods
       end
@@ -58,7 +59,7 @@ module Scrapod
             break result if result
             id = instance_variable_get :"@#{name}_id"
             break if id.nil?
-            instance_variable_set :"@#{name}", constantize.().find(::Redis.new, id)
+            instance_variable_set :"@#{name}", constantize.().find(conn, id)
           end
         end
 
