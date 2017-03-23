@@ -3,7 +3,7 @@
 module Scrapod
   module Redis
     module Attributes
-      class Datetime
+      class Base
         attr_reader :null
 
         def initialize(null: true)
@@ -15,6 +15,16 @@ module Scrapod
           true
         end
 
+        def typecast(_value)
+          raise NotImplementedError, "#{self.class}#typecast not yet implemented"
+        end
+
+        def serialize(_value)
+          raise NotImplementedError, "#{self.class}#serialize not yet implemented"
+        end
+      end
+
+      class Datetime < Base
         def typecast(value)
           return               if value.nil?
           return value         if value.is_a? Time
