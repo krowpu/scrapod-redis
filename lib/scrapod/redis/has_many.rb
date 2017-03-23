@@ -40,6 +40,10 @@ module Scrapod
         conn.sadd "#{me.model_name}:id:#{this.require_id}:#{name}", other.require_id
       end
 
+      def destroy(conn, this, other)
+        conn.srem "#{me.model_name}:id#{this.require_id}:#{name}", other.require_id
+      end
+
     private
 
       def me=(value)

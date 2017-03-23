@@ -180,10 +180,7 @@ module Scrapod
 
           self.class.belongs_to_associations.each do |_name, association|
             other = send association.name
-
-            if other
-              association.inverse.create conn, other, self
-            end
+            association.inverse.create conn, other, self if other
           end
         end
 
@@ -194,6 +191,11 @@ module Scrapod
         conn.multi do
           conn.del "#{self.class.model_name}:id:#{require_id}"
           conn.srem "#{self.class.model_name}:all", require_id
+
+          self.class.belongs_to_associations.each do |_name, association|
+            other = send association.name
+            association.inverse.destroy conn, other, self if other
+          end
         end
 
         @persisted = false
