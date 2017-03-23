@@ -131,6 +131,9 @@ module Scrapod
       end
 
       def initialize(options = {})
+        @id = nil
+        @conn = nil
+
         self.conn = options.delete :conn
 
         if options.key? :id
