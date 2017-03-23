@@ -7,9 +7,10 @@ module Scrapod
     class HasMany
       include Utils
 
-      attr_reader :class_name, :inverse_of
+      attr_reader :me, :class_name, :inverse_of
 
-      def initialize(class_name, inverse_of)
+      def initialize(me, class_name, inverse_of)
+        self.me = me
         self.class_name = class_name
         self.inverse_of = inverse_of
       end
@@ -27,6 +28,11 @@ module Scrapod
       end
 
     private
+
+      def me=(value)
+        raise TypeError, "Expected me to be a #{Class}" unless value.is_a? Class
+        @me = value
+      end
 
       def class_name=(value)
         validate_class_name value
