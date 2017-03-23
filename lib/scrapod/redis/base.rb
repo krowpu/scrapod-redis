@@ -48,6 +48,14 @@ module Scrapod
         @attributes ||= {}
       end
 
+      def self.belongs_to_associations
+        @belongs_to_associations ||= {}
+      end
+
+      def self.has_many_associations # rubocop:disable Style/PredicateName
+        @has_many_associations ||= {}
+      end
+
       def self.datetime(name, null: true)
         validate_attribute_name name
 
@@ -67,10 +75,6 @@ module Scrapod
         end
       end
 
-      def self.belongs_to_associations
-        @belongs_to_associations ||= {}
-      end
-
       def self.belongs_to(name, class_name, inverse_of, null: true)
         validate_attribute_name name
 
@@ -85,10 +89,6 @@ module Scrapod
         define_belongs_to_setter name, association
 
         define_belongs_to_nullifier name
-      end
-
-      def self.has_many_associations # rubocop:disable Style/PredicateName
-        @has_many_associations ||= {}
       end
 
       def self.has_many(name, class_name, inverse_of) # rubocop:disable Style/PredicateName
