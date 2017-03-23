@@ -3,13 +3,16 @@
 require 'json'
 require 'securerandom'
 
-require 'scrapod/redis/utils'
 require 'scrapod/redis/belongs_to'
+require 'scrapod/redis/id'
+require 'scrapod/redis/utils'
 
 module Scrapod
   module Redis
     class Base
       extend BelongsTo
+
+      include Id
 
       def self.model_name
         raise "#{self}.model_name has not been set" if @model_name.nil?
@@ -63,19 +66,6 @@ module Scrapod
           conn.del "#{self.class.model_name}:id:#{id}"
           conn.srem "#{self.class.model_name}:all", id
         end
-      end
-
-      def id
-        @id ||= SecureRandom.uuid.freeze
-      end
-
-      def id=(value)
-        raise "#{self.class}#id has been already set to #{@id.inspect}" unless @id.nil?
-
-        raise TypeError, "Expected ID to be a #{String}" unless value.is_a? String
-        raise ArgumentError, %(Can not set #{self.class}#id to #{value.inspect} because it contains ":") if value =~ /:/
-
-        @id = value.dup.freeze
       end
 
       class Error < RuntimeError
