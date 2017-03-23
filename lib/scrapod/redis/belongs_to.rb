@@ -35,7 +35,10 @@ module Scrapod
           break send :"nullify_#{name}" if id.nil?
 
           raise TypeError, "Expected ID to be a #{String}" unless id.is_a? String
-          raise ArgumentError, %(Can not set #{self.class}##{name}id to #{id.inspect} because it contains ":") if id =~ /:/
+
+          if id =~ /:/
+            raise ArgumentError, %(Can not set #{self.class}##{name}id to #{id.inspect} because it contains ":")
+          end
 
           result = instance_variable_set :"@#{name}_id", id.dup.freeze
           instance_variable_set :"@#{name}", nil
