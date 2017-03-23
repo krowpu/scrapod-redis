@@ -13,9 +13,6 @@ module Scrapod
         raise TypeError, "Expected name to be a #{Symbol}"              unless name.is_a? Symbol
         raise ArgumentError, "Invalid association name #{name.inspect}" unless name =~ Utils::NAME_RE
 
-        raise TypeError, "Expected class name to be a #{String}"        unless class_name.is_a? String
-        raise ArgumentError, "Invalid class name #{class_name.inspect}" unless class_name =~ Utils::CLASS_NAME_RE
-
         constantizer = send :constantizer, class_name
 
         define_belongs_to_id_getter name
