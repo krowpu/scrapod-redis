@@ -16,8 +16,7 @@ module Scrapod
         include Utils
 
         def belongs_to(name, class_name)
-          raise TypeError, "Expected name to be a #{Symbol}"              unless name.is_a? Symbol
-          raise ArgumentError, "Invalid association name #{name.inspect}" unless name =~ Utils::NAME_RE
+          validate_attribute_name name
 
           constantizer = new_constantizer class_name
 

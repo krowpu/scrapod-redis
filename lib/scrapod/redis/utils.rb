@@ -21,8 +21,14 @@ module Scrapod
         end
       end
 
+      def validate_attribute_name(name)
+        raise TypeError, "Expected name to be a #{Symbol}"              unless name.is_a? Symbol
+        raise ArgumentError, "Invalid association name #{name.inspect}" unless name =~ NAME_RE
+      end
+
       module_function :constantize
       module_function :new_constantizer
+      module_function :validate_attribute_name
     end
   end
 end
