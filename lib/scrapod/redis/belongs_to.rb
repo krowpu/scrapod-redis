@@ -8,10 +8,11 @@ module Scrapod
     class BelongsTo
       include Utils
 
-      attr_reader :me, :class_name, :inverse_of, :null
+      attr_reader :me, :name, :class_name, :inverse_of, :null
 
-      def initialize(me, class_name, inverse_of, null: true)
+      def initialize(me, name, class_name, inverse_of, null: true)
         self.me = me
+        self.name = name
         self.class_name = class_name
         self.inverse_of = inverse_of
         self.null = null
@@ -38,6 +39,11 @@ module Scrapod
       def me=(value)
         raise TypeError, "Expected me to be a #{Class}" unless value.is_a? Class
         @me = value
+      end
+
+      def name=(value)
+        validate_attribute_name value
+        @name = value.to_sym
       end
 
       def class_name=(value)

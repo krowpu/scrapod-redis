@@ -47,9 +47,7 @@ module Scrapod
       end
 
       def self.belongs_to(name, class_name, inverse_of, null: true)
-        validate_attribute_name name
-
-        association = belongs_to_associations[name] = BelongsTo.new self.class, class_name, inverse_of, null: null
+        association = belongs_to_associations[name] = BelongsTo.new self.class, name, class_name, inverse_of, null: null
 
         attributes[:"#{name}_id"] = association.attribute
 
@@ -63,9 +61,7 @@ module Scrapod
       end
 
       def self.has_many(name, class_name, inverse_of) # rubocop:disable Style/PredicateName
-        validate_attribute_name name
-
-        association = has_many_associations[name] = HasMany.new self.class, class_name, inverse_of
+        association = has_many_associations[name] = HasMany.new self.class, name, class_name, inverse_of
 
         define_has_many_getter name, association
       end
