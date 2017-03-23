@@ -43,10 +43,10 @@ module Scrapod
         @attributes ||= {}
       end
 
-      def self.datetime(name)
+      def self.datetime(name, null: true)
         validate_attribute_name name
 
-        attribute = attributes[name] = Attributes::Datetime.new
+        attribute = attributes[name] = Attributes::Datetime.new null: null
 
         define_attribute_getter name
         define_attribute_setter name, attribute
@@ -62,10 +62,10 @@ module Scrapod
         end
       end
 
-      def self.belongs_to(name, class_name)
+      def self.belongs_to(name, class_name, null: true)
         validate_attribute_name name
 
-        attributes[:"#{name}_id"] = Attributes::Integer.new
+        attributes[:"#{name}_id"] = Attributes::Integer.new null: null
 
         constantizer = new_constantizer class_name
 
@@ -145,10 +145,13 @@ module Scrapod
       end
 
       def save
+        raise RedordInvalidError unless valid?
+
         conn.multi do
           conn.set "#{self.class.model_name}:id:#{id}", as_json.to_json
           conn.sadd "#{self.class.model_name}:all", id
         end
+
         self
       end
 
@@ -179,6 +182,12 @@ module Scrapod
         end.to_h
       end
 
+      def valid?
+        self.class.attributes.all? do |name, attribute|
+          attribute.validate send name
+        end
+      end
+
     private
 
       attr_reader :conn
@@ -192,6 +201,9 @@ module Scrapod
       end
 
       class Error < RuntimeError
+      end
+
+      class RecordInvalidError < Error
       end
 
       class RecordNotFoundError < Error

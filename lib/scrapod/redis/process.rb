@@ -7,7 +7,7 @@ module Scrapod
     class Process < Base
       self.model_name = 'process'
 
-      datetime :started_at
+      datetime :started_at, null: false
     end
   end
 end
