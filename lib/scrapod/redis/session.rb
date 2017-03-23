@@ -10,13 +10,6 @@ module Scrapod
       belongs_to :process, 'Scrapod::Redis::Process'
 
       datetime :started_at
-
-      def as_json
-        {
-          'process_id' => process_id,
-          'started_at' => started_at&.to_i,
-        }
-      end
     end
   end
 end

@@ -170,6 +170,15 @@ module Scrapod
         @id = value.dup.freeze
       end
 
+      def as_json
+        self.class.attributes.map do |name, attribute|
+          [
+            name.to_s,
+            attribute.serialize(send(name)),
+          ]
+        end.to_h
+      end
+
     private
 
       attr_reader :conn
