@@ -63,6 +63,7 @@ module Scrapod
       def self.has_many(name, class_name, inverse_of) # rubocop:disable Style/PredicateName
         association = has_many_associations[name] = HasMany.new self, name, class_name, inverse_of
 
+        define_has_many_count_getter association
         define_has_many_getter association
       end
 
@@ -117,6 +118,12 @@ module Scrapod
         define_method :"nullify_#{association.name}" do
           instance_variable_set :"@#{association.name}_id", nil
           instance_variable_set :"@#{association.name}",    nil
+        end
+      end
+
+      def self.define_has_many_count_getter(association)
+        define_method :"#{association.name}_count" do
+          association.query_count conn, require_id
         end
       end
 
