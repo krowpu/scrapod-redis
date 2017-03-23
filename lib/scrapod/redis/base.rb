@@ -99,17 +99,13 @@ module Scrapod
           break result if result
           id = instance_variable_get :"@#{association.name}_id"
           break if id.nil?
-          instance_variable_set :"@#{association.name}", association.constantizer.().find(conn, id)
+          instance_variable_set :"@#{association.name}", association.klass.find(conn, id)
         end
       end
 
       def self.define_belongs_to_setter(association)
         define_method :"#{association.name}=" do |record|
           break send :"nullify_#{association.name}" if record.nil?
-
-          klass = association.constantizer.()
-
-          raise TypeError, "Expected record to be a #{klass}" unless record.is_a? klass
 
           send :"#{association.name}_id=", record.require_id
 
