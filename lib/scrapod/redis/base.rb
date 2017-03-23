@@ -135,8 +135,10 @@ module Scrapod
         self.conn = options.delete :conn
 
         if options.key? :id
+          @persisted = true
           self.id = options.delete :id
         else
+          @persisted = false
           @id = SecureRandom.uuid.freeze
         end
 
@@ -146,12 +148,14 @@ module Scrapod
       end
 
       def save
-        raise RedordInvalidError unless valid?
+        raise RecordInvalidError unless valid?
 
         conn.multi do
           conn.set "#{self.class.model_name}:id:#{id}", as_json.to_json
           conn.sadd "#{self.class.model_name}:all", id
         end
+
+        @persisted = true
 
         self
       end
@@ -161,6 +165,12 @@ module Scrapod
           conn.del "#{self.class.model_name}:id:#{id}"
           conn.srem "#{self.class.model_name}:all", id
         end
+
+        @persisted = false
+      end
+
+      def persisted?
+        @persisted
       end
 
       attr_reader :id
