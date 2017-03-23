@@ -28,6 +28,14 @@ RSpec.describe Scrapod::Redis::Base do
 
   it { is_expected.to be_valid }
 
+  specify do
+    expect(Foo.belongs_to_associations[:bar].inverse).to eq Bar.has_many_associations[:foos]
+  end
+
+  specify do
+    expect(Bar.has_many_associations[:foos].inverse).to eq Foo.belongs_to_associations[:bar]
+  end
+
   context 'when required field is set to nil' do
     let(:created_at) { nil }
 

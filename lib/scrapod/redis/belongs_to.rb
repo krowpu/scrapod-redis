@@ -28,6 +28,10 @@ module Scrapod
         @klass ||= constantize class_name
       end
 
+      def inverse
+        @inverse ||= klass.has_many_associations[inverse_of]
+      end
+
     private
 
       def class_name=(value)
