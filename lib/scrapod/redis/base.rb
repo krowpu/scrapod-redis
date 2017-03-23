@@ -117,6 +117,7 @@ module Scrapod
           klass = constantizer.()
 
           raise TypeError, "Expected record to be a #{klass}" unless record.is_a? klass
+          raise "Can only set persisted record to #{self.class}##{name}" unless record.persisted?
 
           send :"#{name}_id=", record.id
 
