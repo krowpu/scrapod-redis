@@ -24,6 +24,21 @@ module Scrapod
         end
       end
 
+      class Integer < Base
+        def typecast(value)
+          return       if value.nil?
+          return value if value.is_a? ::Integer
+
+          result = value.to_i
+          raise TypeError unless result.is_a? ::Integer
+          result
+        end
+
+        def serialize(value)
+          value
+        end
+      end
+
       class Datetime < Base
         def typecast(value)
           return               if value.nil?
