@@ -27,6 +27,10 @@ module Scrapod
       end
 
       def self.find(conn, id)
+        raise TypeError, "Expected ID to be a #{String}"                         unless id.is_a? String
+        raise ArgumentError, %(Blank ID)                                         if id.strip.empty?
+        raise ArgumentError, %(Invalid ID #{id.inspect} because it contains ":") if id =~ /:/
+
         json = conn.get "#{model_name}:id:#{id}"
         raise RecordNotFoundError.new(model_name, id) if json.nil?
         options = JSON.parse json
@@ -87,11 +91,9 @@ module Scrapod
         define_method :"#{name}_id=" do |id|
           break send :"nullify_#{name}" if id.nil?
 
-          raise TypeError, "Expected ID to be a #{String}" unless id.is_a? String
-
-          if id =~ /:/
-            raise ArgumentError, %(Can not set #{self.class}##{name}id to #{id.inspect} because it contains ":")
-          end
+          raise TypeError, "Expected ID to be a #{String}"                                                      unless id.is_a? String
+          raise ArgumentError, %(Blank ID)                                                                      if id.strip.empty?
+          raise ArgumentError, %(Can not set #{self.class}##{name}_id to #{id.inspect} because it contains ":") if id =~ /:/
 
           result = instance_variable_set :"@#{name}_id", id.dup.freeze
           instance_variable_set :"@#{name}", nil
@@ -116,7 +118,7 @@ module Scrapod
 
           klass = constantizer.()
 
-          raise TypeError, "Expected record to be a #{klass}" unless record.is_a? klass
+          raise TypeError, "Expected record to be a #{klass}"            unless record.is_a? klass
           raise "Can only set persisted record to #{self.class}##{name}" unless record.persisted?
 
           send :"#{name}_id=", record.id
@@ -179,7 +181,8 @@ module Scrapod
       def id=(value)
         raise "#{self.class}#id has been already set to #{@id.inspect}" unless @id.nil?
 
-        raise TypeError, "Expected ID to be a #{String}" unless value.is_a? String
+        raise TypeError, "Expected ID to be a #{String}"                                                 unless value.is_a? String
+        raise ArgumentError, %(Can not set #{self.class}#id to blank ID)                                 if value.strip.empty?
         raise ArgumentError, %(Can not set #{self.class}#id to #{value.inspect} because it contains ":") if value =~ /:/
 
         @id = value.dup.freeze
