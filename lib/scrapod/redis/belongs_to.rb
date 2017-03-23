@@ -13,7 +13,7 @@ module Scrapod
         raise TypeError, "Expected name to be a #{Symbol}"              unless name.is_a? Symbol
         raise ArgumentError, "Invalid association name #{name.inspect}" unless name =~ Utils::NAME_RE
 
-        constantizer = send :constantizer, class_name
+        constantizer = new_constantizer class_name
 
         define_belongs_to_id_getter name
         define_belongs_to_id_setter name

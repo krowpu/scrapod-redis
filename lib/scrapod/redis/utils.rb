@@ -12,7 +12,7 @@ module Scrapod
         end
       end
 
-      def constantizer(class_name)
+      def new_constantizer(class_name)
         raise TypeError, "Expected class name to be a #{String}"        unless class_name.is_a? String
         raise ArgumentError, "Invalid class name #{class_name.inspect}" unless class_name =~ CLASS_NAME_RE
 
@@ -22,7 +22,7 @@ module Scrapod
       end
 
       module_function :constantize
-      module_function :constantizer
+      module_function :new_constantizer
     end
   end
 end
