@@ -51,19 +51,19 @@ module Scrapod
 
         attributes[:"#{name}_id"] = association.attribute
 
-        define_belongs_to_id_getter name
-        define_belongs_to_id_setter name
+        define_belongs_to_id_getter association
+        define_belongs_to_id_setter association
 
-        define_belongs_to_getter name, association
-        define_belongs_to_setter name, association
+        define_belongs_to_getter association
+        define_belongs_to_setter association
 
-        define_belongs_to_nullifier name
+        define_belongs_to_nullifier association
       end
 
       def self.has_many(name, class_name, inverse_of) # rubocop:disable Style/PredicateName
         association = has_many_associations[name] = HasMany.new self.class, name, class_name, inverse_of
 
-        define_has_many_getter name, association
+        define_has_many_getter association
       end
 
       def self.define_attribute_getter(name)
@@ -76,61 +76,61 @@ module Scrapod
         end
       end
 
-      def self.define_belongs_to_id_getter(name)
-        attr_reader :"#{name}_id"
+      def self.define_belongs_to_id_getter(association)
+        attr_reader :"#{association.name}_id"
       end
 
-      def self.define_belongs_to_id_setter(name)
-        define_method :"#{name}_id=" do |id|
-          break send :"nullify_#{name}" if id.nil?
+      def self.define_belongs_to_id_setter(association)
+        define_method :"#{association.name}_id=" do |id|
+          break send :"nullify_#{association.name}" if id.nil?
 
           validate_id id
 
-          result = instance_variable_set :"@#{name}_id", id.dup.freeze
-          instance_variable_set :"@#{name}", nil
+          result = instance_variable_set :"@#{association.name}_id", id.dup.freeze
+          instance_variable_set :"@#{association.name}", nil
 
           result
         end
       end
 
-      def self.define_belongs_to_getter(name, association)
-        define_method name do
-          result = instance_variable_get :"@#{name}"
+      def self.define_belongs_to_getter(association)
+        define_method association.name do
+          result = instance_variable_get :"@#{association.name}"
           break result if result
-          id = instance_variable_get :"@#{name}_id"
+          id = instance_variable_get :"@#{association.name}_id"
           break if id.nil?
-          instance_variable_set :"@#{name}", association.constantizer.().find(conn, id)
+          instance_variable_set :"@#{association.name}", association.constantizer.().find(conn, id)
         end
       end
 
-      def self.define_belongs_to_setter(name, association)
-        define_method :"#{name}=" do |record|
-          break send :"nullify_#{name}" if record.nil?
+      def self.define_belongs_to_setter(association)
+        define_method :"#{association.name}=" do |record|
+          break send :"nullify_#{association.name}" if record.nil?
 
           klass = association.constantizer.()
 
           raise TypeError, "Expected record to be a #{klass}" unless record.is_a? klass
 
-          send :"#{name}_id=", record.require_id
+          send :"#{association.name}_id=", record.require_id
 
-          send name
+          send association.name
         end
       end
 
-      def self.define_belongs_to_nullifier(name)
-        define_method :"nullify_#{name}" do
-          instance_variable_set :"@#{name}_id", nil
-          instance_variable_set :"@#{name}",    nil
+      def self.define_belongs_to_nullifier(association)
+        define_method :"nullify_#{association.name}" do
+          instance_variable_set :"@#{association.name}_id", nil
+          instance_variable_set :"@#{association.name}",    nil
         end
       end
 
-      def self.define_has_many_getter(name, association)
-        define_method name do
-          result = instance_variable_get :"@#{name}"
+      def self.define_has_many_getter(association)
+        define_method association.name do
+          result = instance_variable_get :"@#{association.name}"
           break result if result
-          ids = conn.smembers "#{self.class.model_name}:id:#{require_id}:#{name}"
+          ids = conn.smembers "#{self.class.model_name}:id:#{require_id}:#{association.name}"
           result = ids.map { |id| association.klass.find conn, id }
-          instance_variable_set :"@#{name}", result
+          instance_variable_set :"@#{association.name}", result
         end
       end
 
