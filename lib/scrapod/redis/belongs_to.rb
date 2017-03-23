@@ -16,7 +16,7 @@ module Scrapod
         raise TypeError, "Expected class name to be a #{String}"        unless class_name.is_a? String
         raise ArgumentError, "Invalid class name #{class_name.inspect}" unless class_name =~ Utils::CLASS_NAME_RE
 
-        constantizer = self.constantizer class_name
+        constantizer = send :constantizer, class_name
 
         define_belongs_to_id_getter name
         define_belongs_to_id_setter name
