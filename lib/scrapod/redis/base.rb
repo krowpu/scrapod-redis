@@ -107,9 +107,11 @@ module Scrapod
       def initialize(options = {})
         self.conn = options.delete :conn
 
-        self.id = options.delete :id if options.key? :id
-
-        id
+        if options.key? :id
+          self.id = options.delete :id
+        else
+          @id = SecureRandom.uuid.freeze
+        end
 
         options.each do |k, v|
           send :"#{k}=", v
@@ -131,9 +133,7 @@ module Scrapod
         end
       end
 
-      def id
-        @id ||= SecureRandom.uuid.freeze
-      end
+      attr_reader :id
 
       def id=(value)
         raise "#{self.class}#id has been already set to #{@id.inspect}" unless @id.nil?
