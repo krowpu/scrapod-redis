@@ -3,6 +3,7 @@
 require 'json'
 require 'securerandom'
 
+require 'scrapod/redis/attributes'
 require 'scrapod/redis/utils'
 
 module Scrapod
@@ -38,20 +39,26 @@ module Scrapod
         end
       end
 
+      def self.attributes
+        @attributes ||= {}
+      end
+
       def self.datetime(name)
         validate_attribute_name name
 
+        attribute = attributes[name] = Attributes::Datetime.new
+
         define_attribute_getter name
-        define_datetime_setter name
+        define_attribute_setter name, attribute
       end
 
       def self.define_attribute_getter(name)
         attr_reader name
       end
 
-      def self.define_datetime_setter(name)
+      def self.define_attribute_setter(name, attribute)
         define_method :"#{name}=" do |value|
-          instance_variable_set :"@#{name}", value.nil? ? nil : Time.at(value)
+          instance_variable_set :"@#{name}", attribute.typecast(value)
         end
       end
 
