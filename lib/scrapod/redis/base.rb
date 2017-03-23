@@ -46,16 +46,6 @@ module Scrapod
         define_attribute_setter name, attribute
       end
 
-      def self.define_attribute_getter(name)
-        attr_reader name
-      end
-
-      def self.define_attribute_setter(name, attribute)
-        define_method :"#{name}=" do |value|
-          instance_variable_set :"@#{name}", attribute.typecast(value)
-        end
-      end
-
       def self.belongs_to(name, class_name, inverse_of, null: true)
         validate_attribute_name name
 
@@ -76,6 +66,16 @@ module Scrapod
         validate_attribute_name name
 
         has_many_associations[name] = HasMany.new class_name, inverse_of
+      end
+
+      def self.define_attribute_getter(name)
+        attr_reader name
+      end
+
+      def self.define_attribute_setter(name, attribute)
+        define_method :"#{name}=" do |value|
+          instance_variable_set :"@#{name}", attribute.typecast(value)
+        end
       end
 
       def self.define_belongs_to_id_getter(name)
