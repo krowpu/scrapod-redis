@@ -41,9 +41,9 @@ module Scrapod
 
       class Datetime < Base
         def typecast(value)
-          return               if value.nil?
-          return value         if value.is_a? ::Time
-          return Time.at value if value.is_a?(::Integer) || value.is_a?(::Float)
+          return                 if value.nil?
+          return value           if value.is_a? ::Time
+          return ::Time.at value if value.is_a?(::Integer) || value.is_a?(::Float)
           raise TypeError
         end
 
