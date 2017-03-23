@@ -175,7 +175,7 @@ module Scrapod
       attr_reader :id
 
       def require_id
-        raise RecordNotPersistedError if @id.nil? || !presisted?
+        raise RecordNotPersistedError if @id.nil? || !persisted?
         @id
       end
 
