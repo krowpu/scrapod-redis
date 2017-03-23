@@ -10,7 +10,7 @@ module Scrapod
 
       attr_reader :class_name, :inverse_of, :null
 
-      def initialize(class_name, inverse_of: nil, null: true)
+      def initialize(class_name, inverse_of, null: true)
         self.class_name = class_name
         self.inverse_of = inverse_of
         self.null = null
@@ -36,8 +36,6 @@ module Scrapod
       end
 
       def inverse_of=(value)
-        return @inverse_of = nil if value.nil?
-
         validate_attribute_name value
         @inverse_of = value.to_sym
       end

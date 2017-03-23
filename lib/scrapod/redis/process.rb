@@ -7,9 +7,7 @@ module Scrapod
     class Process < Base
       self.model_name = 'process'
 
-      has_many :sessions,
-               'Scrapod::Redis::Session',
-               inverse_of: :process
+      has_many :sessions, 'Scrapod::Redis::Session', :process
 
       datetime :started_at, null: false
     end

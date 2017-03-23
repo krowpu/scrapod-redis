@@ -9,13 +9,13 @@ class Foo < Scrapod::Redis::Base
 
   datetime :created_at, null: false
 
-  belongs_to :bar, 'Bar', null: false, inverse_of: :foos
+  belongs_to :bar, 'Bar', :foos, null: false
 end
 
 class Bar < Scrapod::Redis::Base
   self.model_name = 'bar'
 
-  has_many :foos, 'Foo', inverse_of: :bar
+  has_many :foos, 'Foo', :bar
 end
 
 RSpec.describe Scrapod::Redis::Base do

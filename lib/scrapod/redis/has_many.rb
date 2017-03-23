@@ -9,7 +9,7 @@ module Scrapod
 
       attr_reader :class_name, :inverse_of
 
-      def initialize(class_name, inverse_of:)
+      def initialize(class_name, inverse_of)
         self.class_name = class_name
         self.inverse_of = inverse_of
       end
