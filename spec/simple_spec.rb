@@ -36,6 +36,20 @@ RSpec.describe Scrapod::Redis::Base do
     expect(Bar.has_many_associations[:foos].inverse).to eq Foo.belongs_to_associations[:bar]
   end
 
+  describe 'has many' do
+    before do
+      subject.save
+    end
+
+    specify do
+      expect(bar.foos_count).to eq 1
+    end
+
+    specify do
+      expect(bar.foos.map(&:id)).to eq [subject.id]
+    end
+  end
+
   context 'when required field is set to nil' do
     let(:created_at) { nil }
 
