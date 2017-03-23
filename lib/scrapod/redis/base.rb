@@ -172,30 +172,26 @@ module Scrapod
 
         @id = SecureRandom.uuid.freeze
 
-        conn.multi do
-          conn.set "#{self.class.model_name}:id:#{id}", as_json.to_json
-          conn.sadd "#{self.class.model_name}:all", id
+        conn.set "#{self.class.model_name}:id:#{id}", as_json.to_json
+        conn.sadd "#{self.class.model_name}:all", id
 
-          @persisted = true
+        @persisted = true
 
-          self.class.belongs_to_associations.each do |_name, association|
-            other = send association.name
-            association.inverse.create conn, other, self if other
-          end
+        self.class.belongs_to_associations.each do |_name, association|
+          other = send association.name
+          association.inverse.create conn, other, self if other
         end
 
         self
       end
 
       def destroy
-        conn.multi do
-          conn.del "#{self.class.model_name}:id:#{require_id}"
-          conn.srem "#{self.class.model_name}:all", require_id
+        conn.del "#{self.class.model_name}:id:#{require_id}"
+        conn.srem "#{self.class.model_name}:all", require_id
 
-          self.class.belongs_to_associations.each do |_name, association|
-            other = send association.name
-            association.inverse.destroy conn, other, self if other
-          end
+        self.class.belongs_to_associations.each do |_name, association|
+          other = send association.name
+          association.inverse.destroy conn, other, self if other
         end
 
         @persisted = false
