@@ -175,9 +175,17 @@ module Scrapod
         conn.multi do
           conn.set "#{self.class.model_name}:id:#{id}", as_json.to_json
           conn.sadd "#{self.class.model_name}:all", id
-        end
 
-        @persisted = true
+          @persisted = true
+
+          self.class.belongs_to_associations.each do |_name, association|
+            other = send association.name
+
+            if other
+              association.inverse.create conn, other, self
+            end
+          end
+        end
 
         self
       end

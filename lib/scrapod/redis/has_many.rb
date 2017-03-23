@@ -32,8 +32,12 @@ module Scrapod
         validate_id my_id
 
         conn.smembers("#{me.model_name}:id:#{my_id}:#{name}").map do |id|
-          association.klass.find conn, id
+          klass.find conn, id
         end
+      end
+
+      def create(conn, this, other)
+        conn.sadd "#{me.model_name}:id:#{this.require_id}:#{name}", other.require_id
       end
 
     private
