@@ -8,19 +8,35 @@ class Foo < Scrapod::Redis::Base
   self.model_name = 'foo'
 
   datetime :created_at, null: false
+
+  belongs_to :bar, 'Bar', null: false
+end
+
+class Bar < Scrapod::Redis::Base
+  self.model_name = 'bar'
 end
 
 RSpec.describe Scrapod::Redis::Base do
-  subject { Foo.new conn: conn, created_at: created_at }
+  subject { Foo.new conn: conn, created_at: created_at, bar: bar }
 
   let(:conn) { Redis.new }
 
   let(:created_at) { Time.now }
+  let(:bar) { Bar.create conn }
 
   it { is_expected.to be_valid }
 
   context 'when required field is set to nil' do
     let(:created_at) { nil }
+
+    it { is_expected.not_to be_valid }
+  end
+
+  context 'when associated record is not persisted' do
+    before do
+      subject
+      bar.destroy
+    end
 
     it { is_expected.not_to be_valid }
   end
@@ -129,6 +145,7 @@ RSpec.describe Scrapod::Redis::Base do
   describe '#as_json' do
     it 'serializes record' do
       expect(subject.as_json).to eq(
+        'bar_id'     => bar.id,
         'created_at' => created_at.to_i,
       )
     end

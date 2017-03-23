@@ -69,9 +69,9 @@ module Scrapod
         validate_attribute_name name
         validate_attribute_name inverse_of if inverse_of
 
-        attributes[:"#{name}_id"] = Attributes::Integer.new null: null
-
         constantizer = new_constantizer class_name
+
+        attributes[:"#{name}_id"] = Attributes::ForeignKey.new null ? nil : constantizer
 
         define_belongs_to_id_getter name
         define_belongs_to_id_setter name
@@ -204,7 +204,7 @@ module Scrapod
 
       def valid?
         self.class.attributes.all? do |name, attribute|
-          attribute.validate send name
+          attribute.validate send(name), conn
         end
       end
 
