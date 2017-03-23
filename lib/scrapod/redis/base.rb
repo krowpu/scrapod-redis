@@ -116,9 +116,8 @@ module Scrapod
           klass = constantizer.()
 
           raise TypeError, "Expected record to be a #{klass}"            unless record.is_a? klass
-          raise "Can only set persisted record to #{self.class}##{name}" unless record.persisted?
 
-          send :"#{name}_id=", record.id
+          send :"#{name}_id=", record.require_id
 
           send name
         end
@@ -151,8 +150,8 @@ module Scrapod
         raise RecordInvalidError unless valid?
 
         conn.multi do
-          conn.set "#{self.class.model_name}:id:#{id}", as_json.to_json
-          conn.sadd "#{self.class.model_name}:all", id
+          conn.set "#{self.class.model_name}:id:#{require_id}", as_json.to_json
+          conn.sadd "#{self.class.model_name}:all", require_id
         end
 
         @persisted = true
@@ -162,8 +161,8 @@ module Scrapod
 
       def destroy
         conn.multi do
-          conn.del "#{self.class.model_name}:id:#{id}"
-          conn.srem "#{self.class.model_name}:all", id
+          conn.del "#{self.class.model_name}:id:#{require_id}"
+          conn.srem "#{self.class.model_name}:all", require_id
         end
 
         @persisted = false
@@ -174,6 +173,11 @@ module Scrapod
       end
 
       attr_reader :id
+
+      def require_id
+        raise RecordNotPersistedError if @id.nil? || !presisted?
+        @id
+      end
 
       def id=(value)
         raise "#{self.class}#id has been already set to #{@id.inspect}" unless @id.nil?
@@ -214,6 +218,9 @@ module Scrapod
       end
 
       class RecordInvalidError < Error
+      end
+
+      class RecordNotPersistedError < Error
       end
 
       class RecordNotFoundError < Error
