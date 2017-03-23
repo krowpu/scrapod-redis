@@ -20,6 +20,8 @@ module Scrapod
 
         define_belongs_to_getter name, constantizer
         define_belongs_to_setter name, constantizer
+
+        define_belongs_to_nullifier name
       end
 
     private
@@ -30,11 +32,7 @@ module Scrapod
 
       def define_belongs_to_id_setter(name)
         define_method :"#{name}_id=" do |id|
-          if id.nil?
-            instance_variable_set :"@#{name}_id", nil
-            instance_variable_set :"@#{name}",    nil
-            break
-          end
+          break send :"nullify_#{name}" if id.nil?
 
           raise TypeError, "Expected ID to be a #{String}" unless id.is_a? String
           raise ArgumentError, %(Can not set #{self.class}##{name}id to #{id.inspect} because it contains ":") if id =~ /:/
@@ -58,11 +56,7 @@ module Scrapod
 
       def define_belongs_to_setter(name, constantize)
         define_method :"#{name}=" do |record|
-          if record.nil?
-            instance_variable_set :"@#{name}_id", nil
-            instance_variable_set :"@#{name}",    nil
-            break
-          end
+          break send :"nullify_#{name}" if record.nil?
 
           klass = constantize.()
 
@@ -71,6 +65,13 @@ module Scrapod
           send :"#{name}_id=", record.id
 
           send name
+        end
+      end
+
+      def define_belongs_to_nullifier(name)
+        define_method :"nullify_#{name}" do
+          instance_variable_set :"@#{name}_id", nil
+          instance_variable_set :"@#{name}",    nil
         end
       end
     end
