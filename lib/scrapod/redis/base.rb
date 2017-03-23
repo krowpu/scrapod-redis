@@ -87,20 +87,15 @@ module Scrapod
 
           validate_id id
 
-          result = instance_variable_set :"@#{association.name}_id", id.dup.freeze
-          instance_variable_set :"@#{association.name}", nil
-
-          result
+          instance_variable_set :"@#{association.name}_id", id.dup.freeze
         end
       end
 
       def self.define_belongs_to_getter(association)
         define_method association.name do
-          result = instance_variable_get :"@#{association.name}"
-          break result if result
           id = instance_variable_get :"@#{association.name}_id"
           break if id.nil?
-          instance_variable_set :"@#{association.name}", association.query(conn, id)
+          association.query conn, id
         end
       end
 
@@ -117,7 +112,6 @@ module Scrapod
       def self.define_belongs_to_nullifier(association)
         define_method :"nullify_#{association.name}" do
           instance_variable_set :"@#{association.name}_id", nil
-          instance_variable_set :"@#{association.name}",    nil
         end
       end
 
@@ -129,10 +123,7 @@ module Scrapod
 
       def self.define_has_many_getter(association)
         define_method association.name do
-          result = instance_variable_get :"@#{association.name}"
-          break result if result
-          result = association.query conn, require_id
-          instance_variable_set :"@#{association.name}", result
+          association.query conn, require_id
         end
       end
 
