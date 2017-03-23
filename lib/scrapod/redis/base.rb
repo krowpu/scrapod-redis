@@ -9,6 +9,7 @@ require 'scrapod/redis/utils'
 module Scrapod
   module Redis
     class Base
+      include Utils
       extend Utils
 
       def self.model_name
@@ -27,9 +28,7 @@ module Scrapod
       end
 
       def self.find(conn, id)
-        raise TypeError, "Expected ID to be a #{String}"                         unless id.is_a? String
-        raise ArgumentError, %(Blank ID)                                         if id.strip.empty?
-        raise ArgumentError, %(Invalid ID #{id.inspect} because it contains ":") if id =~ /:/
+        validate_id id
 
         json = conn.get "#{model_name}:id:#{id}"
         raise RecordNotFoundError.new(model_name, id) if json.nil?
@@ -91,9 +90,7 @@ module Scrapod
         define_method :"#{name}_id=" do |id|
           break send :"nullify_#{name}" if id.nil?
 
-          raise TypeError, "Expected ID to be a #{String}"                                                      unless id.is_a? String
-          raise ArgumentError, %(Blank ID)                                                                      if id.strip.empty?
-          raise ArgumentError, %(Can not set #{self.class}##{name}_id to #{id.inspect} because it contains ":") if id =~ /:/
+          validate_id id
 
           result = instance_variable_set :"@#{name}_id", id.dup.freeze
           instance_variable_set :"@#{name}", nil
@@ -181,9 +178,7 @@ module Scrapod
       def id=(value)
         raise "#{self.class}#id has been already set to #{@id.inspect}" unless @id.nil?
 
-        raise TypeError, "Expected ID to be a #{String}"                                                 unless value.is_a? String
-        raise ArgumentError, %(Can not set #{self.class}#id to blank ID)                                 if value.strip.empty?
-        raise ArgumentError, %(Can not set #{self.class}#id to #{value.inspect} because it contains ":") if value =~ /:/
+        validate_id value
 
         @id = value.dup.freeze
       end

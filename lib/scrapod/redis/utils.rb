@@ -21,6 +21,12 @@ module Scrapod
         end
       end
 
+      def validate_id(id)
+        raise TypeError, "Expected ID to be a #{String}"                         unless id.is_a? String
+        raise ArgumentError, %(Blank ID)                                         if id.strip.empty?
+        raise ArgumentError, %(Invalid ID #{id.inspect} because it contains ":") if id =~ /:/
+      end
+
       def validate_model_name(name)
         raise TypeError, "Expected model name to be a #{String}"     unless name.is_a? String
         raise ArgumentError, "Model name #{name.inspect} is invalid" unless name =~ Utils::NAME_RE
