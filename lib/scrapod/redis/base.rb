@@ -65,6 +65,8 @@ module Scrapod
       def self.belongs_to(name, class_name)
         validate_attribute_name name
 
+        attributes[:"#{name}_id"] = Attributes::Integer.new
+
         constantizer = new_constantizer class_name
 
         define_belongs_to_id_getter name
